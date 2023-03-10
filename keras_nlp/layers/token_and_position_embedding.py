@@ -121,8 +121,7 @@ class TokenAndPositionEmbedding(keras.layers.Layer):
     def call(self, inputs):
         embedded_tokens = self.token_embedding(inputs)
         embedded_positions = self.position_embedding(embedded_tokens)
-        outputs = embedded_tokens + embedded_positions
-        return outputs
+        return embedded_tokens + embedded_positions
 
     def compute_mask(self, inputs, mask=None):
         return self.token_embedding.compute_mask(inputs, mask=mask)

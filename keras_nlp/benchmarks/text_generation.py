@@ -129,8 +129,7 @@ def build_model(
         )(x)
     # Output.
     outputs = keras.layers.Dense(vocab_size)(x)
-    model = keras.Model(inputs=inputs, outputs=outputs)
-    return model
+    return keras.Model(inputs=inputs, outputs=outputs)
 
 
 def generate_text(
@@ -140,14 +139,17 @@ def generate_text(
     text_gen_args,
     jit_compile,
 ):
+
+
+
     class TestModel(tf.keras.Model):
         def call(self, inputs):
-            generated = decoding_fn(
+            return decoding_fn(
                 token_probability_fn=token_probability_fn,
                 prompt=inputs,
                 **text_gen_args,
             )
-            return generated
+
 
     test_model = TestModel()
     test_model.compile(jit_compile=jit_compile)

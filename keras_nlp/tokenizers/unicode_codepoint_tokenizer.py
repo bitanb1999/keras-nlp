@@ -240,12 +240,11 @@ class UnicodeCodepointTokenizer(tokenizer.Tokenizer):
             )
 
         # Check normalization_form matches input_encoding.
-        if normalization_form:
-            if input_encoding != "UTF-8":
-                raise ValueError(
-                    """Normalization Forms are Only Supported for Input Encoding
+        if normalization_form and input_encoding != "UTF-8":
+            raise ValueError(
+                """Normalization Forms are Only Supported for Input Encoding
                      UTF-8"""
-                )
+            )
 
         super().__init__(**kwargs)
 
@@ -320,10 +319,9 @@ class UnicodeCodepointTokenizer(tokenizer.Tokenizer):
 
     def detokenize(self, inputs):
         inputs = tf.ragged.boolean_mask(inputs, tf.not_equal(inputs, 0))
-        encoded_string = tf.strings.unicode_encode(
+        return tf.strings.unicode_encode(
             inputs,
             errors=self.errors,
             replacement_char=self.replacement_char,
             output_encoding=self.output_encoding,
         )
-        return encoded_string

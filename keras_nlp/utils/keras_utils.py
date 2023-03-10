@@ -40,10 +40,7 @@ def pack_x_y_sample_weight(x, y=None, sample_weight=None):
     release. See https://github.com/keras-team/keras-nlp/issues/492
     """
     if y is None:
-        if not isinstance(x, (list, tuple)):
-            return x
-        else:
-            return (x,)
+        return (x, ) if isinstance(x, (list, tuple)) else x
     elif sample_weight is None:
         return (x, y)
     else:

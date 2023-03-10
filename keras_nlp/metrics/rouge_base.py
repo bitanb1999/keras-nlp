@@ -75,9 +75,9 @@ class RougeBase(keras.metrics.Metric):
                 f"Received: dtype={dtype}"
             )
 
-        if variant not in tuple(
-            ("rouge" + str(order) for order in range(1, 10))
-        ) + ("rougeL",):
+        if variant not in (
+            tuple(f"rouge{str(order)}" for order in range(1, 10)) + ("rougeL",)
+        ):
             raise ValueError(
                 "Invalid variant of ROUGE. Should be one of: rougeN, rougeL, "
                 "with N ranging from 1 to 9. Received: "

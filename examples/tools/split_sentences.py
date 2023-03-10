@@ -88,7 +88,6 @@ def parse_wiki_file(file):
 
 def parse_text_file(file):
     """Read documents from a plain text file."""
-    documents = []
     file_lines = []
     for line in file:
         line = line.strip()
@@ -96,8 +95,7 @@ def parse_text_file(file):
         if line == "":
             continue
         file_lines.append(line)
-    documents.append(" ".join(file_lines))
-    return documents
+    return [" ".join(file_lines)]
 
 
 def read_file(filename):

@@ -69,21 +69,20 @@ class TranslationModel(keras.Model):
         super().__init__()
         self.encoders = []
         self.decoders = []
-        for _ in range(num_encoders):
-            self.encoders.append(
-                TransformerEncoder(
-                    num_heads=num_heads,
-                    intermediate_dim=transformer_intermediate_dim,
-                )
+        self.encoders.extend(
+            TransformerEncoder(
+                num_heads=num_heads,
+                intermediate_dim=transformer_intermediate_dim,
             )
-        for _ in range(num_decoders):
-            self.decoders.append(
-                TransformerDecoder(
-                    num_heads=num_heads,
-                    intermediate_dim=transformer_intermediate_dim,
-                )
+            for _ in range(num_encoders)
+        )
+        self.decoders.extend(
+            TransformerDecoder(
+                num_heads=num_heads,
+                intermediate_dim=transformer_intermediate_dim,
             )
-
+            for _ in range(num_decoders)
+        )
         self.encoder_tokenizer = encoder_tokenizer
         self.decoder_tokenizer = decoder_tokenizer
 
@@ -121,5 +120,4 @@ class TranslationModel(keras.Model):
                 use_causal_mask=True,
             )
 
-        output = self.dense(decoded)
-        return output
+        return self.dense(decoded)

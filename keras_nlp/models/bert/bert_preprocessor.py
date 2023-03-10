@@ -261,16 +261,15 @@ class BertPreprocessor(keras.layers.Layer):
             # For task model presets, the backbone config is nested.
             backbone_config = metadata["config"]["backbone"]["config"]
         max_sequence_length = backbone_config["max_sequence_length"]
-        if sequence_length is not None:
-            if sequence_length > max_sequence_length:
-                raise ValueError(
-                    f"`sequence_length` cannot be longer than `{preset}` "
-                    f"preset's `max_sequence_length` of {max_sequence_length}. "
-                    f"Received: {sequence_length}."
-                )
-        else:
+        if sequence_length is None:
             sequence_length = max_sequence_length
 
+        elif sequence_length > max_sequence_length:
+            raise ValueError(
+                f"`sequence_length` cannot be longer than `{preset}` "
+                f"preset's `max_sequence_length` of {max_sequence_length}. "
+                f"Received: {sequence_length}."
+            )
         return cls(
             tokenizer=tokenizer,
             sequence_length=sequence_length,

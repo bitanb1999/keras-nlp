@@ -108,7 +108,7 @@ def load_data(task_name):
         # GLUE comes with dictonary data, we convert it to a uniform format
         # (features, label), where features is a tuple consisting of all
         # features.
-        features = tuple([x[name] for name in feature_names])
+        features = tuple(x[name] for name in feature_names)
         label = x["label"]
         return (features, label)
 
@@ -125,7 +125,7 @@ def load_data(task_name):
     else:
         train_ds, test_ds, validation_ds = tfds.load(
             f"glue/{task_name}",
-            split=["train", "test" + test_suffix, "validation" + test_suffix],
+            split=["train", f"test{test_suffix}", f"validation{test_suffix}"],
         )
 
     # Extract out the index order of test dataset.
@@ -173,7 +173,7 @@ def generate_submission_files(finetuning_model, test_ds, idx_order):
     }
     if not os.path.exists(FLAGS.submission_directory):
         os.makedirs(FLAGS.submission_directory)
-    filename = FLAGS.submission_directory + "/" + filenames[FLAGS.task_name]
+    filename = f"{FLAGS.submission_directory}/{filenames[FLAGS.task_name]}"
     labelname = labelnames.get(FLAGS.task_name)
 
     predictions = finetuning_model.predict(test_ds)

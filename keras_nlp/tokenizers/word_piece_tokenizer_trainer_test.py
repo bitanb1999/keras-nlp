@@ -178,8 +178,7 @@ class WordPieceTokenizerTrainerTest(tf.test.TestCase):
         )
         vocab_from_file = []
         with open(vocab_file, "r") as f:
-            for line in f:
-                vocab_from_file.append(line.strip())
+            vocab_from_file.extend(line.strip() for line in f)
         self.assertAllEqual(vocab_from_file, test_output)
 
     def test_reserved_tokens(self):

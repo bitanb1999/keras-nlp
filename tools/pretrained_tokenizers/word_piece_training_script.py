@@ -37,10 +37,11 @@ for directory in directories:
         files = []
         for folder in os.listdir(directory):
             path = os.path.join(directory, folder)
-            for file in os.listdir(path):
-                if file[0] != ".":
-                    files.append(os.path.join(path, file))
-
+            files.extend(
+                os.path.join(path, file)
+                for file in os.listdir(path)
+                if file[0] != "."
+            )
         if os.path.exists(f"{directory}_{vocab_size}_{identifier}.txt"):
             raise ValueError("already done.")
 

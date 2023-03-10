@@ -103,7 +103,7 @@ def _train_validation_split(arrays, validation_split):
     batch_dim = int(first_non_none.shape[0])
     split_at = int(math.floor(batch_dim * (1.0 - validation_split)))
 
-    if split_at == 0 or split_at == batch_dim:
+    if split_at in [0, batch_dim]:
         raise ValueError(
             "Training data contains {batch_dim} samples, which is not "
             "sufficient to split it into a validation and training set as "
@@ -115,9 +115,7 @@ def _train_validation_split(arrays, validation_split):
         )
 
     def _split(t, start, end):
-        if t is None:
-            return t
-        return t[start:end]
+        return t if t is None else t[start:end]
 
     train_arrays = tf.nest.map_structure(
         functools.partial(_split, start=0, end=split_at), arrays
@@ -179,14 +177,15 @@ class PipelineModel(keras.Model):
                 self.preprocess_samples, num_parallel_calls=tf.data.AUTOTUNE
             ).prefetch(tf.data.AUTOTUNE)
 
-        if validation_data is not None:
-            if not isinstance(validation_data, tf.data.Dataset):
-                (vx, vy, vsw) = keras.utils.unpack_x_y_sample_weight(
-                    validation_data
-                )
-                validation_data = _convert_inputs_to_dataset(
-                    vx, vy, vsw, batch_size
-                )
+        if validation_data is not None and not isinstance(
+            validation_data, tf.data.Dataset
+        ):
+            (vx, vy, vsw) = keras.utils.unpack_x_y_sample_weight(
+                validation_data
+            )
+            validation_data = _convert_inputs_to_dataset(
+                vx, vy, vsw, batch_size
+            )
 
         return super().fit(
             x=x,

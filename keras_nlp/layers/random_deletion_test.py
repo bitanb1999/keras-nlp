@@ -65,9 +65,7 @@ class RandomDeletionTest(tf.test.TestCase):
         self.assertAllEqual(output, exp_output)
 
         def skip_fn(word):
-            if word == "Tensorflow" or word == "like":
-                return True
-            return False
+            return word in ["Tensorflow", "like"]
 
         augmenter = RandomDeletion(
             rate=0.4, max_deletions=1, seed=42, skip_fn=skip_fn
@@ -79,9 +77,7 @@ class RandomDeletionTest(tf.test.TestCase):
         self.assertAllEqual(output, exp_output)
 
         def skip_py_fn(word):
-            if word == "Tensorflow" or word == "like":
-                return True
-            return False
+            return word in ["Tensorflow", "like"]
 
         augmenter = RandomDeletion(
             rate=0.4, max_deletions=1, seed=42, skip_py_fn=skip_py_fn

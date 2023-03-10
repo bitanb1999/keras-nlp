@@ -165,10 +165,9 @@ def compute_word_piece_vocabulary(
     )
     if len(vocab) > vocabulary_size:
         vocab = vocab[:vocabulary_size]
-    if vocabulary_output_file is not None:
-        vocab_text = "".join([line + "\n" for line in vocab])
-        # Write vocab to file.
-        with open(vocabulary_output_file, "w") as vocab_file:
-            vocab_file.write(vocab_text)
-    else:
+    if vocabulary_output_file is None:
         return vocab
+    vocab_text = "".join([line + "\n" for line in vocab])
+    # Write vocab to file.
+    with open(vocabulary_output_file, "w") as vocab_file:
+        vocab_file.write(vocab_text)

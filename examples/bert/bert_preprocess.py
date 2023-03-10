@@ -91,7 +91,7 @@ def convert_to_unicode(text):
     elif isinstance(text, bytes):
         return text.decode("utf-8", "ignore")
     else:
-        raise ValueError("Unsupported string type: %s" % (type(text)))
+        raise ValueError(f"Unsupported string type: {type(text)}")
 
 
 def printable_text(text):
@@ -101,7 +101,7 @@ def printable_text(text):
     elif isinstance(text, bytes):
         return text.decode("utf-8", "ignore")
     else:
-        raise ValueError("Unsupported string type: %s" % (type(text)))
+        raise ValueError(f"Unsupported string type: {type(text)}")
 
 
 # This tuple holds a complete training instance of data ready for serialization.
@@ -124,7 +124,7 @@ def write_instance_to_example_files(
     writer = tf.io.TFRecordWriter(output_filename)
     total_written = 0
     lookup = dict(zip(vocab, range(len(vocab))))
-    for (inst_index, instance) in enumerate(instances):
+    for instance in instances:
         token_ids = [lookup[x] for x in instance.tokens]
         padding_mask = [1] * len(token_ids)
         segment_ids = list(instance.segment_ids)
@@ -207,10 +207,8 @@ def create_training_instances(
         if line.size == 0 and current_document:
             all_documents.append(current_document)
             current_document = []
-        else:
-            line = [x.decode("utf-8") for x in line]
-            if line:
-                current_document.append(line)
+        elif line := [x.decode("utf-8") for x in line]:
+            current_document.append(line)
     rng.shuffle(all_documents)
 
     instances = []
@@ -319,13 +317,11 @@ def create_instances_from_document(
                         tokens_b.extend(current_chunk[j])
                 truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng)
 
-                assert len(tokens_a) >= 1
-                assert len(tokens_b) >= 1
+                assert tokens_a
+                assert tokens_b
 
-                tokens = []
-                segment_ids = []
-                tokens.append("[CLS]")
-                segment_ids.append(0)
+                tokens = ["[CLS]"]
+                segment_ids = [0]
                 for token in tokens_a:
                     tokens.append(token)
                     segment_ids.append(0)
@@ -375,15 +371,11 @@ def create_masked_lm_predictions(
 ):
     """Creates the predictions for the masked LM objective."""
 
-    # TODO(jbischof): replace with keras_nlp.layers.MLMMaskGenerator
-    # (Issue #166)
-
-    cand_indexes = []
-    for (i, token) in enumerate(tokens):
-        if token == "[CLS]" or token == "[SEP]":
-            continue
-        cand_indexes.append([i])
-
+    cand_indexes = [
+        [i]
+        for i, token in enumerate(tokens)
+        if token not in ["[CLS]", "[SEP]"]
+    ]
     rng.shuffle(cand_indexes)
 
     output_tokens = list(tokens)
@@ -402,11 +394,7 @@ def create_masked_lm_predictions(
         # predictions, then just skip this candidate.
         if len(masked_lms) + len(index_set) > num_to_predict:
             continue
-        is_any_index_covered = False
-        for index in index_set:
-            if index in covered_indexes:
-                is_any_index_covered = True
-                break
+        is_any_index_covered = any(index in covered_indexes for index in index_set)
         if is_any_index_covered:
             continue
         for index in index_set:
@@ -416,15 +404,12 @@ def create_masked_lm_predictions(
             # 80% of the time, replace with [MASK]
             if rng.random() < 0.8:
                 masked_token = "[MASK]"
+            elif rng.random() < 0.5:
+                masked_token = tokens[index]
             else:
-                # 10% of the time, keep original
-                if rng.random() < 0.5:
-                    masked_token = tokens[index]
-                # 10% of the time, replace with random word
-                else:
-                    masked_token = vocab_words[
-                        rng.randint(0, len(vocab_words) - 1)
-                    ]
+                masked_token = vocab_words[
+                    rng.randint(0, len(vocab_words) - 1)
+                ]
 
             output_tokens[index] = masked_token
 
@@ -471,8 +456,7 @@ def main(_):
     # Load the vocabulary.
     vocab = []
     with open(FLAGS.vocab_file, "r") as vocab_file:
-        for line in vocab_file:
-            vocab.append(line.strip())
+        vocab.extend(line.strip() for line in vocab_file)
     tokenizer = tf_text.BertTokenizer(
         FLAGS.vocab_file,
         lower_case=FLAGS.do_lower_case,

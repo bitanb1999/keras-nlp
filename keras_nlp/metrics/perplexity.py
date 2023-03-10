@@ -162,10 +162,7 @@ class Perplexity(keras.metrics.Metric):
     def result(self):
         if self._number_of_samples == 0:
             return 0.0
-        perplexity_score = tf.exp(
-            self._aggregate_crossentropy / self._number_of_samples
-        )
-        return perplexity_score
+        return tf.exp(self._aggregate_crossentropy / self._number_of_samples)
 
     def reset_state(self):
         self._aggregate_crossentropy.assign(0.0)

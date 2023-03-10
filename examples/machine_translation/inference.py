@@ -95,9 +95,7 @@ def decode_sequence(input_sentence, model, max_sequence_length, lookup_table):
         if predicted_token == end_token:
             break
 
-    detokenized_output = []
-    for token in decoded_sentence:
-        detokenized_output.append(lookup_table[token])
+    detokenized_output = [lookup_table[token] for token in decoded_sentence]
     return " ".join(detokenized_output)
 
 
@@ -119,17 +117,15 @@ def main(_):
         logging.info(f"Translated results: {translated}")
 
     else:
-        translated = []
-        for example in EXAMPLES:
-            translated.append(
-                decode_sequence(
-                    example[0],
-                    loaded_model,
-                    FLAGS.sequence_length,
-                    index_lookup_table,
-                )
+        translated = [
+            decode_sequence(
+                example[0],
+                loaded_model,
+                FLAGS.sequence_length,
+                index_lookup_table,
             )
-
+            for example in EXAMPLES
+        ]
         for i in range(len(EXAMPLES)):
             print("ENGLISH SENTENCE: ", EXAMPLES[i][0])
             print("MACHINE TRANSLATED RESULT: ", translated[i])

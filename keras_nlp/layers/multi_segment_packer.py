@@ -162,10 +162,7 @@ class MultiSegmentPacker(keras.layers.Layer):
 
     def _convert_dense(self, x):
         """Converts inputs to rank 2 ragged tensors."""
-        if isinstance(x, tf.Tensor):
-            return tf.RaggedTensor.from_tensor(x)
-        else:
-            return x
+        return tf.RaggedTensor.from_tensor(x) if isinstance(x, tf.Tensor) else x
 
     def _trim_inputs(self, inputs):
         """Trim inputs to desired length."""
@@ -179,7 +176,7 @@ class MultiSegmentPacker(keras.layers.Layer):
                 self.sequence_length - num_special_tokens
             ).trim(inputs)
         else:
-            raise ValueError("Unsupported truncate: %s" % self.truncate)
+            raise ValueError(f"Unsupported truncate: {self.truncate}")
 
     def _combine_inputs(self, segments):
         """Combine inputs with start and end values added."""
