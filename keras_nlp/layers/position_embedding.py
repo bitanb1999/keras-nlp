@@ -104,20 +104,19 @@ class PositionEmbedding(keras.layers.Layer):
         super().build(input_shape)
 
     def call(self, inputs):
-        if isinstance(inputs, tf.RaggedTensor):
-            bounding_shape = inputs.bounding_shape()
-            position_embeddings = self._trim_and_broadcast_position_embeddings(
-                bounding_shape,
-            )
-            # then apply row lengths to recreate the same ragged shape as inputs
-            return tf.RaggedTensor.from_tensor(
-                position_embeddings,
-                inputs.nested_row_lengths(),
-            )
-        else:
+        if not isinstance(inputs, tf.RaggedTensor):
             return self._trim_and_broadcast_position_embeddings(
                 tf.shape(inputs),
             )
+        bounding_shape = inputs.bounding_shape()
+        position_embeddings = self._trim_and_broadcast_position_embeddings(
+            bounding_shape,
+        )
+        # then apply row lengths to recreate the same ragged shape as inputs
+        return tf.RaggedTensor.from_tensor(
+            position_embeddings,
+            inputs.nested_row_lengths(),
+        )
 
     def _trim_and_broadcast_position_embeddings(self, shape):
         input_length = shape[SEQUENCE_AXIS]

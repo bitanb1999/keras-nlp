@@ -77,11 +77,10 @@ def remove_strings_from_inputs(tensor, string_to_remove):
     flatten_indexes = tf.where(non_empty_mask)
     flatten_result = tf.gather_nd(tensor, flatten_indexes)
     row_lengths = tf.reduce_sum(tf.cast(non_empty_mask, tf.int64), axis=1)
-    result = tf.RaggedTensor.from_row_lengths(
+    return tf.RaggedTensor.from_row_lengths(
         values=flatten_result,
         row_lengths=row_lengths,
     )
-    return result
 
 
 def split_strings_for_bpe(inputs):
@@ -316,10 +315,7 @@ class BytePairTokenizer(tokenizer.Tokenizer):
         # early in the vocab, this should be fine.
 
         keys = self.get_vocabulary()
-        for token in keys:
-            if self.vocabulary[token] == id:
-                return token
-        return None
+        return next((token for token in keys if self.vocabulary[token] == id), None)
 
     def token_to_id(self, token: str) -> int:
         """Convert a string token to an integer id."""
@@ -513,17 +509,14 @@ class BytePairTokenizer(tokenizer.Tokenizer):
             self.id_to_token_map.lookup(inputs), axis=-1
         )
         split_unicode_text = tf.strings.unicode_split(unicode_text, "UTF-8")
-        byte_text = tf.strings.reduce_join(
+        return tf.strings.reduce_join(
             self.unicode2byte.lookup(split_unicode_text), axis=-1
         )
-
-        return byte_text
 
     def _transform_bytes(self, tokens):
         """Map token bytes to unicode using `byte2unicode`."""
         split_bytes = tf.strings.bytes_split(tokens)
-        split_unicode = self.byte2unicode.lookup(split_bytes)
-        return split_unicode
+        return self.byte2unicode.lookup(split_bytes)
 
     def _bpe_merge_and_update_cache(self, tokens):
         """Process unseen tokens and add to cache."""

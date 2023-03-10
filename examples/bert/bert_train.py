@@ -194,9 +194,7 @@ class MaskedLMHead(keras.layers.Layer):
         flat_sequence_tensor = tf.reshape(
             sequence_tensor, [batch_size * seq_length, width]
         )
-        output_tensor = tf.gather(flat_sequence_tensor, flat_positions)
-
-        return output_tensor
+        return tf.gather(flat_sequence_tensor, flat_positions)
 
 
 class BertPretrainingModel(keras.Model):
@@ -308,8 +306,7 @@ def decode_record(record):
         "nsp": example["next_sentence_labels"],
     }
     sample_weights = {"mlm": example["masked_lm_weights"], "nsp": tf.ones((1,))}
-    sample = (inputs, labels, sample_weights)
-    return sample
+    return inputs, labels, sample_weights
 
 
 def get_checkpoint_callback():
@@ -354,7 +351,7 @@ def main(_):
             "set `input_directory` flag as a directory."
         )
     files = tf.io.gfile.listdir(FLAGS.input_directory)
-    input_filenames = [FLAGS.input_directory + "/" + file for file in files]
+    input_filenames = [f"{FLAGS.input_directory}/{file}" for file in files]
 
     if not input_filenames:
         logging.info("No input files found. Check `input_directory` flag.")
@@ -362,9 +359,7 @@ def main(_):
 
     vocab = []
     with tf.io.gfile.GFile(FLAGS.vocab_file) as vocab_file:
-        for line in vocab_file:
-            vocab.append(line.strip())
-
+        vocab.extend(line.strip() for line in vocab_file)
     model_config = MODEL_CONFIGS[FLAGS.model_size]
 
     if FLAGS.tpu_name is None:

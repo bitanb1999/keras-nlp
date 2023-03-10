@@ -275,7 +275,7 @@ class BeamSearchTextGenerationTest(tf.test.TestCase, parameterized.TestCase):
         self.assertEqual(outputs.shape, [2, 5])
 
     def test_one_beam_generation(self):
-        for i in range(50):
+        for _ in range(50):
             inputs = tf.constant([random.randint(0, 9)])
             beam_output = beam_search(
                 self.token_probability_fn,

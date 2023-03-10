@@ -67,9 +67,7 @@ class RandomSwapTest(tf.test.TestCase):
         self.assertAllEqual(output, exp_output)
 
         def skip_fn(word):
-            if word == "Tensorflow" or word == "like":
-                return True
-            return False
+            return word in ["Tensorflow", "like"]
 
         augmenter = RandomSwap(rate=0.9, max_swaps=3, seed=11, skip_fn=skip_fn)
         augmented = augmenter(split)
@@ -79,9 +77,7 @@ class RandomSwapTest(tf.test.TestCase):
         self.assertAllEqual(output, exp_output)
 
         def skip_py_fn(word):
-            if word == "Tensorflow" or word == "like":
-                return True
-            return False
+            return word in ["Tensorflow", "like"]
 
         augmenter = RandomSwap(
             rate=0.9, max_swaps=3, seed=11, skip_py_fn=skip_py_fn

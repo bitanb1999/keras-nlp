@@ -90,18 +90,17 @@ def convert_checkpoints(preset, keras_nlp_model, hf_model):
     extract_dir = EXTRACT_DIR.format(preset)
     config_path = os.path.join(extract_dir, "config.json")
 
-    # Build config.
-    cfg = {}
     with open(config_path, "r") as pt_cfg_handler:
         pt_cfg = json.load(pt_cfg_handler)
-    cfg["vocabulary_size"] = pt_cfg["vocab_size"]
-    cfg["num_layers"] = pt_cfg["n_layers"]
-    cfg["num_heads"] = pt_cfg["n_heads"]
-    cfg["hidden_dim"] = pt_cfg["dim"]
-    cfg["intermediate_dim"] = pt_cfg["hidden_dim"]
-    cfg["dropout"] = pt_cfg["dropout"]
-    cfg["max_sequence_length"] = pt_cfg["max_position_embeddings"]
-
+    cfg = {
+        "vocabulary_size": pt_cfg["vocab_size"],
+        "num_layers": pt_cfg["n_layers"],
+        "num_heads": pt_cfg["n_heads"],
+        "hidden_dim": pt_cfg["dim"],
+        "intermediate_dim": pt_cfg["hidden_dim"],
+        "dropout": pt_cfg["dropout"],
+        "max_sequence_length": pt_cfg["max_position_embeddings"],
+    }
     print("Config:", cfg)
 
     hf_wts = hf_model.state_dict()

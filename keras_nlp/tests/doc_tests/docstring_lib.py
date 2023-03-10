@@ -209,12 +209,11 @@ class DoctestOutputChecker(doctest.OutputChecker, object):
         # `float_size_good` will be False. This is because the floats extracted
         # from the string is converted into a 1-D numpy array. Hence hidding
         # floats is not allowed anymore.
-        if self.text_good:
-            if not self.float_size_good:
-                got.append(
-                    "\n\nCAUTION: tf_doctest doesn't work if *some* of the "
-                    '*float output* is hidden with a "...".'
-                )
+        if self.text_good and not self.float_size_good:
+            got.append(
+                "\n\nCAUTION: tf_doctest doesn't work if *some* of the "
+                '*float output* is hidden with a "...".'
+            )
 
         got.append(self.MESSAGE)
         got = "\n".join(got)

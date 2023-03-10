@@ -38,7 +38,7 @@ def read_data(filepath):
         text_pairs = []
         for line in lines:
             eng, spa = line.split("\t")
-            spa = "[start] " + spa + " [end]"
+            spa = f"[start] {spa} [end]"
             text_pairs.append((eng, spa))
     return text_pairs
 
@@ -54,7 +54,7 @@ def split_train_val_test(text_pairs):
     return train_pairs, val_pairs, test_pairs
 
 
-strip_chars = string.punctuation + "¿"
+strip_chars = f"{string.punctuation}¿"
 strip_chars = strip_chars.replace("[", "")
 strip_chars = strip_chars.replace("]", "")
 
@@ -62,11 +62,7 @@ strip_chars = strip_chars.replace("]", "")
 @keras.utils.register_keras_serializable()
 def custom_standardization(input_string):
     lowercase = tf.strings.lower(input_string)
-    return tf.strings.regex_replace(
-        lowercase,
-        "[%s]" % re.escape(strip_chars),
-        "",
-    )
+    return tf.strings.regex_replace(lowercase, f"[{re.escape(strip_chars)}]", "")
 
 
 def prepare_tokenizer(train_pairs, sequence_length, vocab_size):

@@ -89,13 +89,13 @@ def load_data(task_name):
         test_suffix = "_mismatched"
 
     def split_features(x):
-        features = tuple([x[name] for name in feature_names])
+        features = tuple(x[name] for name in feature_names)
         labels = x["label"]
         return features, labels
 
     train_ds, test_ds, validation_ds = tfds.load(
         f"glue/{task_name}",
-        split=["train", "test" + test_suffix, "validation" + test_suffix],
+        split=["train", f"test{test_suffix}", f"validation{test_suffix}"],
     )
     train_ds = train_ds.map(split_features, num_parallel_calls=tf.data.AUTOTUNE)
     test_ds = test_ds.map(split_features, num_parallel_calls=tf.data.AUTOTUNE)

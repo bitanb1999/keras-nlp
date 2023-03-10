@@ -24,7 +24,9 @@ def list_filenames_for_arg(arg_pattern):
         pattern = os.path.expanduser(pattern)
         if os.path.isdir(pattern):
             pattern = os.path.join(pattern, "**", "*")
-        for filename in glob.iglob(pattern, recursive=True):
-            if not os.path.isdir(filename):
-                input_filenames.append(filename)
+        input_filenames.extend(
+            filename
+            for filename in glob.iglob(pattern, recursive=True)
+            if not os.path.isdir(filename)
+        )
     return input_filenames

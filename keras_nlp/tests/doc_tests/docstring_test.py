@@ -29,12 +29,11 @@ PACKAGE = "keras_nlp."
 
 
 def find_modules():
-    keras_nlp_modules = []
-    for name, module in sys.modules.items():
-        if name.startswith(PACKAGE):
-            keras_nlp_modules.append(module)
-
-    return keras_nlp_modules
+    return [
+        module
+        for name, module in sys.modules.items()
+        if name.startswith(PACKAGE)
+    ]
 
 
 @pytest.mark.skipif(

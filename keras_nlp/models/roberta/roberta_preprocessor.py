@@ -231,16 +231,15 @@ class RobertaPreprocessor(keras.layers.Layer):
         # otherwise check that `sequence_length` not too long.
         metadata = cls.presets[preset]
         max_sequence_length = metadata["config"]["max_sequence_length"]
-        if sequence_length is not None:
-            if sequence_length > max_sequence_length:
-                raise ValueError(
-                    f"`sequence_length` cannot be longer than `{preset}` "
-                    f"preset's `max_sequence_length` of {max_sequence_length}. "
-                    f"Received: {sequence_length}."
-                )
-        else:
+        if sequence_length is None:
             sequence_length = max_sequence_length
 
+        elif sequence_length > max_sequence_length:
+            raise ValueError(
+                f"`sequence_length` cannot be longer than `{preset}` "
+                f"preset's `max_sequence_length` of {max_sequence_length}. "
+                f"Received: {sequence_length}."
+            )
         return cls(
             tokenizer=tokenizer,
             sequence_length=sequence_length,
@@ -325,7 +324,7 @@ class RobertaMultiSegmentPacker(keras.layers.Layer):
                 self.sequence_length - num_special_tokens
             ).trim(inputs)
         else:
-            raise ValueError("Unsupported truncate: %s" % self.truncate)
+            raise ValueError(f"Unsupported truncate: {self.truncate}")
 
     def _combine_inputs(self, segments):
         """Combine inputs with start and end values added."""
@@ -340,12 +339,10 @@ class RobertaMultiSegmentPacker(keras.layers.Layer):
 
         segments_to_combine = []
         for i, seg in enumerate(segments):
-            segments_to_combine.append(start_column if i == 0 else end_column)
-            segments_to_combine.append(seg)
-            segments_to_combine.append(end_column)
-
-        token_ids = tf.concat(segments_to_combine, 1)
-        return token_ids
+            segments_to_combine.extend(
+                (start_column if i == 0 else end_column, seg, end_column)
+            )
+        return tf.concat(segments_to_combine, 1)
 
     def call(self, inputs):
         def to_ragged(x):
